@@ -1,6 +1,7 @@
 'use client';
 
 import { useEntries } from "@/hooks/useEntries";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { formatDate } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,10 +17,8 @@ export default function EntriesPage() {
     const [search, setSearch] = useState("");
     const [date, setDate] = useState<Date | undefined>(undefined);
 
-    // TODO: Debounce search in real implementation
-    // Passing filters to useEntries hook (need to update useEntries to accept params)
-    // For now assuming the hook will be updated or we filter client side for quick prototype if API ready
-    const { entries, isLoading } = useEntries("user-id-placeholder");
+    const { userId } = useCurrentUser();
+    const { entries, isLoading } = useEntries(userId || "");
 
     const filteredEntries = entries?.filter(entry => {
         const matchesSearch = entry.content.toLowerCase().includes(search.toLowerCase());

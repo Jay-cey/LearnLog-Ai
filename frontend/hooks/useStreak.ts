@@ -5,7 +5,7 @@ import { StreakData } from '@/types';
 export function useStreak(userId?: string) {
   const streakQuery = useQuery({
     queryKey: ['streak', userId],
-    queryFn: () => api.get<StreakData>(`/streak`),
+    queryFn: () => api.get<StreakData>(`/streak?user_id=${userId}`),
     enabled: !!userId,
   });
 

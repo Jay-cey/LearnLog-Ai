@@ -1,6 +1,7 @@
 'use client';
 
 import { useEntries } from "@/hooks/useEntries";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,12 +19,22 @@ type FormValues = {
 
 export default function NewEntryPage() {
     const router = useRouter();
-    const { createEntry } = useEntries("user-id-placeholder"); // TODO: real user id
+    const { userId, isLoading: userLoading } = useCurrentUser();
+    const { createEntry } = useEntries(userId || "");
     const { register, handleSubmit, formState: { errors }, setError } = useForm<FormValues>();
     const [aiFeedback, setAiFeedback] = useState<{ type: 'error' | 'success', message: string, detail?: string } | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     const onSubmit = async (data: FormValues) => {
+        if (!userId) {
+            setAiFeedback({
+                type: 'error',
+                message: 'Authentication Required',
+                detail: 'Please sign in again to create entries.'
+            });
+            return;
+        }
+
         setIsAnalyzing(true);
         setAiFeedback(null);
         try {
@@ -33,16 +44,43 @@ export default function NewEntryPage() {
             });
             router.push('/entries');
         } catch (error: any) {
-            console.error(error);
-            const detail = error.message;
-            // Rudimentary check if it's our AI validation error (usually comes as stringified JSON or detail object if typed)
-            // For now assuming the API throws a readable error message
+            console.error('Entry creation error:', error);
 
-            setAiFeedback({
-                type: 'error',
-                message: 'AI Validation Failed',
-                detail: detail || "Your entry didn't pass the vibe check."
-            });
+            // Check if it's an authentication error
+            if (error.message?.includes('not authenticated')) {
+                setAiFeedback({
+                    type: 'error',
+                    message: 'Authentication Required',
+                    detail: 'Please sign out and sign in again to continue.'
+                });
+            } else {
+                // Try to parse the error detail from the backend
+                let feedbackMessage = "Your entry didn't pass the vibe check.";
+
+                try {
+                    // The error message might be a JSON string or already an object
+                    const errorDetail = typeof error.message === 'string'
+                        ? JSON.parse(error.message)
+                        : error.message;
+
+                    if (errorDetail && errorDetail.feedback) {
+                        feedbackMessage = errorDetail.feedback;
+                    } else if (typeof error.message === 'string') {
+                        feedbackMessage = error.message;
+                    }
+                } catch (parseError) {
+                    // If parsing fails, use the error message as is
+                    if (error.message) {
+                        feedbackMessage = error.message;
+                    }
+                }
+
+                setAiFeedback({
+                    type: 'error',
+                    message: 'AI Validation Failed',
+                    detail: feedbackMessage
+                });
+            }
         } finally {
             setIsAnalyzing(false);
         }
@@ -86,12 +124,19 @@ export default function NewEntryPage() {
                         )}
 
                         <div className="flex justify-end">
-                            <Button type="submit" disabled={isAnalyzing} size="lg" className="w-full sm:w-auto">
+                            <Button
+                                type="submit"
+                                disabled={isAnalyzing || userLoading || !userId}
+                                size="lg"
+                                className="w-full sm:w-auto"
+                            >
                                 {isAnalyzing ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                         Analyzing Authenticity...
                                     </>
+                                ) : !userId && !userLoading ? (
+                                    'Sign In Required'
                                 ) : (
                                     'Submit Entry'
                                 )}

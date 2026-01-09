@@ -1,11 +1,13 @@
 'use client';
 
 import { useStreak } from "@/hooks/useStreak";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function StreakCounter() {
-    const { streak, isLoading } = useStreak("user-id-placeholder"); // TODO: real user id
+    const { userId } = useCurrentUser();
+    const { streak, isLoading } = useStreak(userId || "");
 
     if (isLoading) return null;
 

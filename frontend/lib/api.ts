@@ -17,7 +17,11 @@ async function fetchAPI<T>(endpoint: string, options: FetchOptions = {}): Promis
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
-    throw new Error(error.detail || 'An error occurred');
+    // Handle both string and object error details
+    const errorMessage = typeof error.detail === 'object' 
+      ? JSON.stringify(error.detail)
+      : (error.detail || 'An error occurred');
+    throw new Error(errorMessage);
   }
 
   return res.json();

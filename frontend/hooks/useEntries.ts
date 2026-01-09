@@ -12,8 +12,12 @@ export function useEntries(userId?: string) {
   });
 
   const createEntry = useMutation({
-    mutationFn: (data: { content: string; date: string }) => 
-      api.post<Entry>(`/entries?user_id=${userId}`, data),
+    mutationFn: (data: { content: string; date: string }) => {
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+      return api.post<Entry>(`/entries?user_id=${userId}`, data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['entries'] });
       queryClient.invalidateQueries({ queryKey: ['streak'] });

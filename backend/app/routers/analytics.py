@@ -42,6 +42,31 @@ async def get_analytics_summary(
         "top_topics": ["Learning", "Coding", "Growth"] 
     }
 
+@router.get("/stats")
+async def get_user_stats(
+    user_id: UUID,
+    db: AsyncSession = Depends(get_db)
+):
+    """Get overall user statistics for dashboard"""
+    # Total entries
+    total_entries = await db.scalar(
+        select(func.count(Entry.id)).where(Entry.user_id == user_id)
+    )
+    
+    # Total words
+    total_words = await db.scalar(
+        select(func.sum(Entry.word_count)).where(Entry.user_id == user_id)
+    )
+    
+    # Calculate level (1 level per 10 entries, starting at level 1)
+    level = max(1, (total_entries or 0) // 10 + 1)
+    
+    return {
+        "total_entries": total_entries or 0,
+        "total_words": total_words or 0,
+        "level": level,
+    }
+
 @router.get("/activity")
 async def get_weekly_activity(
     user_id: UUID,
