@@ -54,6 +54,7 @@ app = FastAPI(
 origins = [
     "http://localhost:3000",
     "http://localhost:8000",
+    "https://learn-log-ai.vercel.app"
 ]
 
 app.add_middleware(
