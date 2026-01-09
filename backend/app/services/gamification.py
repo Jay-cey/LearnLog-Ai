@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from uuid import UUID
 from ..models.achievement import Achievement, UserAchievement
 from ..models.streak import StreakData
@@ -13,8 +13,7 @@ class GamificationService:
         """
         # 1. Get User Data
         streak_data = await db.scalar(select(StreakData).where(StreakData.user_id == user_id))
-        entry_count = await db.scalar(select(Entry).where(Entry.user_id == user_id).limit(101)) # Check count loosely
-        # In real app, perform optimized count queries
+        entry_count = await db.scalar(select(func.count()).select_from(Entry).where(Entry.user_id == user_id)) or 0
         
         # 2. Define Criteria (Hardcoded for prototype simplicity)
         # (Achievement Code, Condition)

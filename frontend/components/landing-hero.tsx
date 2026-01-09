@@ -65,13 +65,13 @@ export function LandingHero() {
 
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <Button asChild size="lg" className="h-12 px-8 text-base shadow-lg shadow-primary-500/20">
-                            <Link href="/signin">
+                            <Link href="/signin" className="flex items-center">
                                 Get Started Free
                                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                             </Link>
                         </Button>
                         <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base backdrop-blur-sm bg-white/50 dark:bg-gray-950/50">
-                            <Link href="https://github.com/yourusername/learnlog-ai">View on GitHub</Link>
+                            <Link href="https://github.com/jay-cey/learnlog-ai">View on GitHub</Link>
                         </Button>
                     </div>
                 </motion.div>

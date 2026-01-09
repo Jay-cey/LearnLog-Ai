@@ -33,14 +33,19 @@ async def calculate_streak(user_id: UUID, db: AsyncSession):
     # Update StreakData table
     streak_data = await db.scalar(select(StreakData).where(StreakData.user_id == user_id))
     if not streak_data:
-        streak_data = StreakData(user_id=user_id)
+        streak_data = StreakData(
+            user_id=user_id,
+            longest_streak=0  # Initialize to 0 to avoid None comparison
+        )
         db.add(streak_data)
     
     streak_data.current_streak = current_streak
     streak_data.last_entry_date = dates[0]
     streak_data.total_entries = len(dates) # or count all entries if multiple per day allowed
     
-    if current_streak > streak_data.longest_streak:
+    # Use 0 as default if longest_streak is None
+    longest_streak = streak_data.longest_streak or 0
+    if current_streak > longest_streak:
         streak_data.longest_streak = current_streak
         
     await db.commit()

@@ -65,9 +65,10 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
-from .routers import entries, streaks, analytics, users
+from .routers import entries, streaks, analytics, users, achievements
 
 app.include_router(entries.router, prefix="/api/v1")
 app.include_router(streaks.router, prefix="/api/v1")
 app.include_router(analytics.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
+app.include_router(achievements.router, prefix="/api/v1")

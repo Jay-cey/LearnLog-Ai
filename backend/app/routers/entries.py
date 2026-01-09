@@ -56,6 +56,14 @@ async def create_entry(
     await db.commit()
     await db.refresh(new_entry)
     
+    # Update streak after creating entry
+    from ..services.streak_calculator import calculate_streak
+    current_streak, longest_streak = await calculate_streak(user_id, db)
+    
+    # Check and award achievements using the gamification service
+    from ..services.gamification import gamification_service
+    await gamification_service.check_achievements(user_id, db)
+    
     return new_entry
 
 @router.get("/", response_model=List[EntryResponse])

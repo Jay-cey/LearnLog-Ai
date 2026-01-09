@@ -5,8 +5,16 @@ from ..database import get_db
 from ..models.user import User
 from ..schemas.user import UserCreate, UserResponse
 from uuid import UUID
+import random
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+# Available avatar options
+AVATAR_OPTIONS = [
+    "/images/avatar1.jpg",
+    "/images/avatar2.jpg",
+    "/images/avatar3.jpg",
+]
 
 @router.post("/sync", response_model=UserResponse, status_code=status.HTTP_200_OK)
 async def sync_user(
@@ -29,16 +37,20 @@ async def sync_user(
         # Update user info if changed
         existing_user.email = user_data.email
         existing_user.name = user_data.name
-        existing_user.image = user_data.image
+        # Only update image if a new one is provided
+        if user_data.image:
+            existing_user.image = user_data.image
         await db.commit()
         await db.refresh(existing_user)
         return existing_user
     
-    # Create new user
+    # Create new user with random avatar if no image provided
+    user_image = user_data.image or random.choice(AVATAR_OPTIONS)
+    
     new_user = User(
         email=user_data.email,
         name=user_data.name,
-        image=user_data.image,
+        image=user_image,
         provider=user_data.provider,
         provider_id=user_data.provider_id
     )
