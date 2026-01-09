@@ -14,6 +14,7 @@ class GamificationService:
         # 1. Get User Data
         streak_data = await db.scalar(select(StreakData).where(StreakData.user_id == user_id))
         entry_count = await db.scalar(select(func.count()).select_from(Entry).where(Entry.user_id == user_id)) or 0
+        total_words = await db.scalar(select(func.sum(Entry.word_count)).where(Entry.user_id == user_id)) or 0
         
         # 2. Define Criteria (Hardcoded for prototype simplicity)
         # (Achievement Code, Condition)
@@ -23,6 +24,9 @@ class GamificationService:
             ("FIRST_STEP", True), # Always unlock on first check if they have an entry (assumed called after entry)
             ("STREAK_3", streak_data and streak_data.current_streak >= 3),
             ("STREAK_7", streak_data and streak_data.current_streak >= 7),
+            ("STREAK_30", streak_data and streak_data.current_streak >= 30),
+            ("WORDS_1000", total_words >= 1000),
+            ("ENTRIES_10", entry_count >= 10),
         ]
 
         # 3. Check against DB

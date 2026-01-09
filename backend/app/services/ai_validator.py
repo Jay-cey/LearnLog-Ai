@@ -82,7 +82,7 @@ class AIValidator:
             """)
             
             result = await db.execute(query, {
-                'embedding': embedding.tolist(),
+                'embedding': str(embedding.tolist()),
                 'user_id': user_id
             })
             row = result.fetchone()

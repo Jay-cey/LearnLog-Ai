@@ -34,7 +34,7 @@ function MiniStat({ label, value, icon: Icon, colorClass, delay = 0 }: { label: 
 }
 
 export default function DashboardPage() {
-    const { userId } = useCurrentUser();
+    const { userId, user } = useCurrentUser();
     const { stats, activity, isLoading } = useAnalytics(userId);
 
     // Format numbers with commas
@@ -52,7 +52,7 @@ export default function DashboardPage() {
                     transition={{ duration: 0.6 }}
                     className="text-4xl md:text-5xl font-black tracking-tight text-gray-900 dark:text-white"
                 >
-                    Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-500">Traveler</span>
+                    Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-accent-500">{user?.name || "Traveler"}</span>
                 </motion.h1>
                 <motion.p
                     initial={{ opacity: 0, x: -20 }}
