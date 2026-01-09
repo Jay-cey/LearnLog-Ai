@@ -13,10 +13,18 @@ class AIValidator:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(AIValidator, cls).__new__(cls)
-            cls._instance.model = SentenceTransformer('all-MiniLM-L6-v2')
+            cls._instance._model = None # Lazy load storage
             cls._instance.similarity_threshold = 0.85
             cls._instance.min_word_count = 15  # Increased from 10 for more substance
         return cls._instance
+
+    @property
+    def model(self):
+        if self._model is None:
+            print("[AIValidator] Loading embedding model (lazy)...")
+            self._model = SentenceTransformer('all-MiniLM-L6-v2')
+            print("[AIValidator] Model loaded.")
+        return self._model
 
     async def validate_entry(
         self, 
